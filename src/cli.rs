@@ -1,4 +1,4 @@
-use clap::{arg, Args, Command, FromArgMatches as _, Parser};
+use clap::{arg, Parser};
 use std::path::PathBuf;
 
 pub const DEFAULT_OUT: &str = "out.png";
@@ -10,12 +10,13 @@ const LONG: &str = "Pixelifier uses simple box blur algorhytm to pixelify the im
 #[command(name = "pixelify")]
 #[command(bin_name = "pixelify")]
 #[command(version,  author, about = ABOUT, long_about = LONG)]
+#[command(arg_required_else_help = true)]
 pub struct Cli {
     pub input: PathBuf,
     #[arg(short, long, default_value = DEFAULT_OUT)]
     pub output: Option<PathBuf>,
     #[arg(short, long, default_value = "3")]
-    pub scale: u8,
+    pub scale: u32,
 }
 
 impl Cli {

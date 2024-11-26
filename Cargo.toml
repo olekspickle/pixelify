@@ -12,3 +12,11 @@ Image downsampler, pixelifies all your images!
 [dependencies]
 clap = { version = "4.5.21", features = ["derive"] }
 image = "0.25.5"
+
+[lib]
+name = "pixelify"
+path = "src/lib.rs"
+
+[[bin]]
+name = "pixelify"
+path = "bin/pixelify.rs"
