@@ -1,0 +1,14 @@
+[package]
+name = "pixelify"
+authors = ["Oleks Pickle <22867443+olekspickle@users.noreply.github.com>"]
+version = "0.1.0"
+licence = "MIT OR Apache-2.0"
+repository = "https://github.com/olekspickle/pixelify"
+edition = "2021"
+description = """
+Image downsampler, pixelifies all your images!
+"""
+
+[dependencies]
+clap = { version = "4.5.21", features = ["derive"] }
+image = "0.25.5"
