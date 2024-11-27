@@ -1,4 +1,4 @@
-//! //! ![pixelify](../examples/out.png)
+//! ![input](../examples/in.png) | ![output](../examples/out.png)
 //!
 //! # Overview
 //! This library is for easy image pixelation
@@ -6,6 +6,7 @@
 //!
 //! ```bash
 //! pixelify <image> [-o OUTPUT]
+//! cargo run --bin pixelify pine-forest.png -s 20
 //! ```
 //!
 //! # Features

@@ -1,6 +1,6 @@
 # pixelify
 
-//! ![pixelify](../examples/out.png)
+![input](../examples/in.png) | ![output](../examples/out.png)
 
 ## Overview
 This library is for easy image pixelation
@@ -8,6 +8,7 @@ The use is simple:
 
 ```bash
 pixelify <image> [-o OUTPUT]
+cargo run --bin pixelify pine-forest.png -s 20
 ```
 
 ## Features

@@ -5,11 +5,13 @@
 
 use image::{ImageBuffer, Pixel, Rgba};
 
+//pub type ImageBuf<T> = ImageBuffer<T, Vec<u8>>;
 pub type ImageBuf = ImageBuffer<Rgba<u8>, Vec<u8>>;
 
 pub struct BoxBlur;
 
 impl BoxBlur {
+    //pub fn run<T: Pixel>(img: &mut ImageBuf<T>, scale: u32) -> &mut ImageBuf<T> {
     pub fn run(img: &mut ImageBuf, scale: u32) -> &mut ImageBuf {
         let w = img.width();
         let h = img.height();
@@ -21,6 +23,8 @@ impl BoxBlur {
         img
     }
 
+    // TODO: make generic for all images
+    //fn blend_rectangle<T: Pixel>(img: &mut ImageBuf<T>, (x, y): (u32, u32), s: u32) {
     fn blend_rectangle(img: &mut ImageBuf, (x, y): (u32, u32), s: u32) {
         let w = img.width();
         let h = img.height();
@@ -53,6 +57,7 @@ impl BoxBlur {
         //            n + 1,
         //        )
         //    });
+        let channels = img.get_pixel(0, 0);
         let mut r_sum = 0;
         let mut g_sum = 0;
         let mut b_sum = 0;
@@ -115,28 +120,15 @@ mod tests {
         let grid = BoxBlur::uniform_grid(W, H, S);
         let expect: &[(u32, u32)] = &[
             (3, 3),
-            (3, 4),
-            (3, 5),
             (3, 6),
-            (3, 7),
-            (3, 8),
             (3, 9),
             (6, 3),
-            (6, 4),
-            (6, 5),
             (6, 6),
-            (6, 7),
-            (6, 8),
             (6, 9),
             (9, 3),
-            (9, 4),
-            (9, 5),
             (9, 6),
-            (9, 7),
-            (9, 8),
             (9, 9),
         ];
-
         assert_eq!(expect, grid);
     }
 
