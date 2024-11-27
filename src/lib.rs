@@ -1,4 +1,4 @@
-//! ![input](examples/in.png) | ![output](examples/out.png)
+//! ![input](https://github.com/user-attachments/assets/992bca58-4d1b-40f3-999a-ca244656e84d) | ![output](https://github.com/user-attachments/assets/e9580cee-4aee-42eb-a999-8df01cc3e217)
 //!
 //! # Overview
 //! This library is for easy image pixelation
