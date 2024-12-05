@@ -1,4 +1,4 @@
-use clap::{arg, Parser};
+use clap::{arg, crate_authors, crate_version, Parser};
 use std::path::PathBuf;
 
 pub const DEFAULT_OUT: &str = "out.png";
@@ -9,7 +9,7 @@ const LONG: &str = "Pixelifier uses simple box blur algorhytm to pixelify the im
 #[derive(Parser, Debug)]
 #[command(name = "pixelify")]
 #[command(bin_name = "pixelify")]
-#[command(version,  author, about = ABOUT, long_about = LONG)]
+#[command(version = crate_version!(),  author = crate_authors!("\n"), about = ABOUT, long_about = LONG)]
 #[command(arg_required_else_help = true)]
 pub struct Cli {
     pub input: PathBuf,
@@ -17,10 +17,4 @@ pub struct Cli {
     pub output: Option<PathBuf>,
     #[arg(short, long, default_value = "3")]
     pub scale: u32,
-}
-
-impl Cli {
-    pub fn init() -> Cli {
-        Cli::parse()
-    }
 }

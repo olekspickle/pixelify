@@ -3,29 +3,47 @@
 //! Takes mutable image buffer and changes the pixels so that
 //!
 
-use image::{ImageBuffer, Pixel, Rgba};
-
-//pub type ImageBuf<T> = ImageBuffer<T, Vec<u8>>;
-pub type ImageBuf = ImageBuffer<Rgba<u8>, Vec<u8>>;
+use image::{
+    error::{ImageFormatHint, UnsupportedError},
+    EncodableLayout, ImageBuffer, ImageError, Pixel, RgbaImage,
+};
+use std::io::Cursor;
 
 pub struct BoxBlur;
 
 impl BoxBlur {
-    //pub fn run<T: Pixel>(img: &mut ImageBuf<T>, scale: u32) -> &mut ImageBuf<T> {
-    pub fn run(img: &mut ImageBuf, scale: u32) -> &mut ImageBuf {
+    pub fn run(buf: &[u8], scale: u32) -> Result<RgbaImage, ImageError> {
+        let format = image::guess_format(buf)?;
+        let error = |s: &str| {
+            ImageError::Unsupported(UnsupportedError::from_format_and_kind(
+                ImageFormatHint::Exact(format),
+                image::error::UnsupportedErrorKind::GenericFeature(s.to_owned()),
+            ))
+        };
+
+        let c = Cursor::new(buf);
+
+        let img = image::load(c, format).unwrap();
         let w = img.width();
         let h = img.height();
+        if scale >= w || scale >= h {
+            return Err(error("Scale is bigger that the image"));
+        }
+        if scale <= 1 {
+            return Err(error("Scale must be bigger than 1 pixel"));
+        }
+
+        let mut img: RgbaImage = ImageBuffer::new(w / scale, h / scale);
 
         let uniform_grid = Self::uniform_grid(w, h, scale);
         for (x, y) in uniform_grid {
-            Self::blend_rectangle(img, (x, y), scale);
+            Self::blend_rectangle(&mut img, (x, y), scale);
         }
-        img
+
+        Ok(img)
     }
 
-    // TODO: make generic for all images
-    //fn blend_rectangle<T: Pixel>(img: &mut ImageBuf<T>, (x, y): (u32, u32), s: u32) {
-    fn blend_rectangle(img: &mut ImageBuf, (x, y): (u32, u32), s: u32) {
+    fn blend_rectangle(img: &mut RgbaImage, (x, y): (u32, u32), s: u32) {
         let w = img.width();
         let h = img.height();
 
@@ -113,11 +131,11 @@ mod tests {
     use super::*;
 
     const S: u32 = 3;
-    const W: u32 = 10;
-    const H: u32 = 10;
+    const W: u8 = 10;
+    const H: u8 = 10;
     #[test]
     fn grid() {
-        let grid = BoxBlur::uniform_grid(W, H, S);
+        let grid = BoxBlur::uniform_grid(W as u32, H as u32, S);
         let expect: &[(u32, u32)] = &[
             (3, 3),
             (3, 6),
@@ -134,13 +152,13 @@ mod tests {
 
     #[test]
     fn run_works() {
-        let mut img_buf = ImageBuf::new(W, H);
-        let buf = img_buf.clone();
-        let new_buf = BoxBlur::run(&mut img_buf, S);
+        let img_buf = &[W * H; 0];
+        let buf = &img_buf.clone();
+        let rgba = BoxBlur::run(img_buf, S).unwrap();
 
-        println!("buf {:?} vs {:?}", buf.clone(), new_buf.clone());
-        let mut expect = ImageBuf::new(W, H);
+        println!("buf {:?} vs {:?}", buf.clone(), rgba.clone());
+        let expect = &[W * H; 0];
 
-        assert_eq!(&mut expect, new_buf);
+        assert_eq!(expect, rgba.as_bytes());
     }
 }
