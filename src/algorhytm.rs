@@ -5,7 +5,7 @@
 
 use image::{
     error::{ImageFormatHint, UnsupportedError},
-    EncodableLayout, ImageBuffer, ImageError, Pixel, RgbaImage,
+    ImageError, Pixel, RgbaImage,
 };
 use std::io::Cursor;
 
@@ -22,8 +22,8 @@ impl BoxBlur {
         };
 
         let c = Cursor::new(buf);
+        let mut img: RgbaImage = image::load(c, format).expect("Failed to load image").into();
 
-        let img = image::load(c, format).unwrap();
         let w = img.width();
         let h = img.height();
         if scale >= w || scale >= h {
@@ -32,8 +32,12 @@ impl BoxBlur {
         if scale <= 1 {
             return Err(error("Scale must be bigger than 1 pixel"));
         }
-
-        let mut img: RgbaImage = ImageBuffer::new(w / scale, h / scale);
+        if scale > w / 2 || scale > h / 2 {
+            return Err(error(
+                "Scale too big for this image, result will be ugly.
+                Best results will be in range: 3 - width/3 or 3 - height/3",
+            ));
+        }
 
         let uniform_grid = Self::uniform_grid(w, h, scale);
         for (x, y) in uniform_grid {
@@ -54,9 +58,9 @@ impl BoxBlur {
         let (x1, y1) = (x.saturating_sub(s / 2), y.saturating_sub(s / 2));
         let (x2, y2) = ((x1 + s).min(w), (y1 + s).min(h));
 
-        // Compute the average color of the region
-        // TODO: figure out the better iterator version: cloning buffer for each pixel for big
-        // images is madness
+        // Compute the blend color of the region
+        // TODO: figure out the better iterator version: cloning the whole buffer for each pixel
+        // for big images is memory madness
         //let (avg_r, avg_g, avg_b, avg_a, count) = (x1..x2)
         //    .flat_map(|xi| {
         //        let tmp = img.clone();
@@ -75,7 +79,7 @@ impl BoxBlur {
         //            n + 1,
         //        )
         //    });
-        let channels = img.get_pixel(0, 0);
+
         let mut r_sum = 0;
         let mut g_sum = 0;
         let mut b_sum = 0;
@@ -99,7 +103,7 @@ impl BoxBlur {
             return;
         }
 
-        let avg_color = image::Rgba([
+        let blend_color = image::Rgba([
             (r_sum / n) as u8,
             (g_sum / n) as u8,
             (b_sum / n) as u8,
@@ -109,9 +113,10 @@ impl BoxBlur {
         // Apply the average color to the region
         (x1..x2)
             .flat_map(|xi| (y1..y2).map(move |yi| (xi, yi)))
-            .for_each(|(xi, yi)| *img.get_pixel_mut(xi, yi) = avg_color);
+            .for_each(|(xi, yi)| *img.get_pixel_mut(xi, yi) = blend_color);
     }
 
+    /// Basically get scale bounded grids
     fn uniform_grid(w: u32, h: u32, s: u32) -> Vec<(u32, u32)> {
         (s..w)
             .enumerate()
@@ -129,6 +134,7 @@ impl BoxBlur {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use image::EncodableLayout;
 
     const S: u32 = 3;
     const W: u8 = 10;

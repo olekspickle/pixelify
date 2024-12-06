@@ -2,7 +2,7 @@
 name = "pixelify"
 authors = ["Oleks Pickle <22867443+olekspickle@users.noreply.github.com>"]
 version = "0.1.0"
-licence = "MIT OR Apache-2.0"
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/olekspickle/pixelify"
 edition = "2021"
 description = """
