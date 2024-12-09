@@ -42,6 +42,7 @@ impl BoxBlur {
         }
 
         let uniform_grid = Self::uniform_grid(w, h, scale);
+        println!("uniform grid: {uniform_grid:?}");
         for (x, y) in uniform_grid {
             Self::blend_rectangle(&mut img, (x, y), scale);
         }
@@ -120,11 +121,11 @@ impl BoxBlur {
 
     /// Basically get scale bounded grids
     fn uniform_grid(w: u32, h: u32, s: u32) -> Vec<(u32, u32)> {
-        (0..=w)
+        (s / 2..=w)
             .enumerate()
             .filter(|(i, _)| i % s as usize == 0)
             .flat_map(|x| {
-                (0..=h)
+                (s / 2..=h)
                     .enumerate()
                     .filter(|(i, _)| i % s as usize == 0)
                     .map(move |y| (x.1, y.1))
