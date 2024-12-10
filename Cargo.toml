@@ -13,6 +13,7 @@ Image downsampler, pixelifies all your images!
 anyhow = "1.0.94"
 clap = { version = "4.5.21", features = ["derive", "cargo"] }
 image = "0.25.5"
+num = "0.4.3"
 
 [lib]
 name = "pixelify"

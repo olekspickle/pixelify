@@ -7,6 +7,7 @@ use image::{
     error::{ImageFormatHint, UnsupportedError},
     ImageError, Pixel, RgbaImage,
 };
+use num::Integer;
 
 pub struct BoxBlur;
 
@@ -19,7 +20,6 @@ impl BoxBlur {
                 image::error::UnsupportedErrorKind::GenericFeature(s.to_owned()),
             ))
         };
-        //println!("{buf:?}\n, format:{format:?}");
 
         let mut img: RgbaImage = image::load_from_memory_with_format(buf, format)
             .expect("Failed to load image")
@@ -34,15 +34,16 @@ impl BoxBlur {
             return Err(error("\nScale must be bigger than 1 pixel"));
         }
         if scale > w / 2 || scale > h / 2 || w % scale != 0 || h % scale != 0 {
-            return Err(error(
+            let gcd = w.gcd(&h);
+            let msg = format!(
                 "\nScale too big for this image, result will be ugly.
-                Best results will be in range: 3 - width/3 or 3 - height/3.
-                Additionally, scale should be so that width/height are divisible by scale evenly.",
-            ));
+                Suggestions for your dimensions ({w},{h}) are : 2-{gcd}"
+            );
+            return Err(error(&msg));
         }
 
         let uniform_grid = Self::uniform_grid(w, h, scale);
-        println!("uniform grid: {uniform_grid:?}");
+        //println!("uniform grid: {uniform_grid:?}");
         for (x, y) in uniform_grid {
             Self::blend_rectangle(&mut img, (x, y), scale);
         }
@@ -54,12 +55,13 @@ impl BoxBlur {
         let w = img.width();
         let h = img.height();
 
-        if x + 1 == w || y + 1 == h {
-            return;
-        }
+        //if x + 1 == w || y + 1 == h {
+        //    return;
+        //}
 
         let (x1, y1) = (x.saturating_sub(s / 2), y.saturating_sub(s / 2));
         let (x2, y2) = ((x1 + s).min(w), (y1 + s).min(h));
+        //println!("in:({x},{y}), 1:({x1},{y1}), 2:({x2},{y2})");
 
         // Compute the blend color of the region
         // TODO: figure out the better iterator version: cloning the whole buffer for each pixel
